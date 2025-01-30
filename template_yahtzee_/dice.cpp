@@ -1,4 +1,4 @@
-#include "Dice.h"
+#include "dice.h"
 #include <cstdlib>
 #include <ctime>
 #include <iostream>

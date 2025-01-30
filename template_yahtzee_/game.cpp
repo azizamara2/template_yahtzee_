@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "game.h"
 #include <iostream>
 #include <fstream>   // For file handling
 #include <sstream>   // For string handling
@@ -58,7 +58,27 @@ void Game::displayRules() {
     std::cout << "5. Bonus points are awarded for specific combinations.\n";
 }
 
-// Initialize game and players
+// starting player
+int Game::determineStartingPlayer() {
+    std::vector<int> rolls;
+    for (size_t i = 0; i < players.size(); ++i) {
+        dice.rollAll();
+        int rollTotal = std::accumulate(dice.getDice().begin(), dice.getDice().end(), 0);
+        rolls.push_back(rollTotal);
+        std::cout << players[i].getName() << " rolled: ";
+        for (int die : dice.getDice()) {
+            std::cout << die << " ";
+        }
+        std::cout << " (Total: " << rollTotal << ")\n";
+    }
+
+    auto maxRoll = std::max_element(rolls.begin(), rolls.end());
+    int startingPlayerIndex = std::distance(rolls.begin(), maxRoll);
+    std::cout << players[startingPlayerIndex].getName() << " will start the game!\n";
+    return startingPlayerIndex;
+}
+
+
 void Game::initializeGame() {
     std::cout << "Initializing game...\n";
     std::cout << "Enter the number of players: ";
@@ -72,9 +92,13 @@ void Game::initializeGame() {
         players.emplace_back(name); // Add players to the vector
     }
 
+    // Determine starting player
+    int startingPlayerIndex = determineStartingPlayer();
+    // Rotate the players vector so the starting player is first
+    std::rotate(players.begin(), players.begin() + startingPlayerIndex, players.end());
+
     std::cout << "Players initialized. Starting game...\n";
 }
-
 // Game loop
 void Game::playRound() {
     for (int round = 0; round < rounds; ++round) {
