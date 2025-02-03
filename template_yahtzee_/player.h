@@ -20,6 +20,7 @@ public:
     int calculateScore(int category, const std::vector<int>& dice); // Calculates the score for a category
     int getTotalScore() const; // Returns the total score of the player
     bool isCategoryScored(int category) const; // Checks if a category has been scored
+    int getUpperSectionTotal() const; //categories 1-6 for bonus check
 };
 
 #endif // PLAYER_H

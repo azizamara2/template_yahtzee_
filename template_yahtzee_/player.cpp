@@ -76,10 +76,24 @@ int Player::calculateScore(int category, const std::vector<int>& dice) {
     }
 }
 
+int Player::getUpperSectionTotal() const {
+    int upperSectionTotal = 0;
+    for (int i = 0; i < 6; ++i) { // Categories 1-6 (indices 0-5)
+        upperSectionTotal += scoreCard[i];
+    }
+    return upperSectionTotal;
+}
+
 
 
 int Player::getTotalScore() const {
-    return std::accumulate(scoreCard.begin(), scoreCard.end(), 0);
+    int totalScore = std::accumulate(scoreCard.begin(), scoreCard.end(), 0);
+    if (getUpperSectionTotal() >= 63) {
+        totalScore += 35;
+        std::cout << "35 Bonus points added (UpperSection total score:"<<getUpperSectionTotal() << std::endl; 
+    }
+
+    return totalScore;
 }
 
 bool Player::isCategoryScored(int category) const {

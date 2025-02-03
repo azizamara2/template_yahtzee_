@@ -209,7 +209,7 @@ void Game::playRound() {
                     std::cout << "Would you like to roll again? (y/n): ";
                     char choice;
                     std::cin >> choice;
-
+                    
                     if (choice == 'n' || choice == 'N') break;
 
                     std::cout << "Enter dice indices to reroll (space-separated, e.g., 0 1 4): ";
