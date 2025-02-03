@@ -18,7 +18,7 @@ private:
     void initializeGame(); // Initializes the game settings
     void playRound(); // Handles the logic for playing a single round
     void displayHighScores(); // Displays high scores
-
+    void updateHighScores(); // save highscores
 
 public:
     Game(); // Constructor to initialize the game

@@ -32,6 +32,35 @@ void Game::displayHighScores() {
     std::cout << "-------------------\n";
 }
 
+void Game::updateHighScores() {
+    std::ifstream highScoreFile("highscores.txt");
+    std::unordered_map<std::string, int> highScores;
+
+    // Read existing highscores
+    std::string playerName;
+    int score;
+    while (highScoreFile >> playerName >> score) {
+        highScores[playerName] = score;
+    }
+    highScoreFile.close();
+
+    // Update highscores with current game results
+    for (const auto& player : players) {
+        int totalScore = player.getTotalScore();
+        if (highScores.find(player.getName()) == highScores.end() || totalScore > highScores[player.getName()]) {
+            highScores[player.getName()] = totalScore;
+        }
+    }
+
+    // Write updated highscores back to the file
+    std::ofstream outFile("highscores.txt");
+    for (const auto& entry : highScores) {
+        outFile << entry.first << " " << entry.second << "\n";
+    }
+    outFile.close();
+}
+
+
 // Check and validate numeric input in range
 int Game::getValidatedInput(int min, int max) {
     int input;
@@ -200,6 +229,7 @@ void Game::playRound() {
     for (const auto& player : players) {
         std::cout << "\n" << player.getName() << "'s Total Score: " << player.getTotalScore() << "\n";
     }
+    updateHighScores();
     displayMenu();
 }
 
