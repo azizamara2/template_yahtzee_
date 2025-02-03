@@ -128,100 +128,161 @@ void Game::initializeGame() {
 
     std::cout << "Players initialized. Starting game...\n";
 }
+
+// Computer player logic
+void Game::computerTurn(Player& computer) {
+    std::cout << "It's the computer's turn.\n";
+
+    // Initial roll
+    dice.rollAll();
+    std::cout << "Computer's initial roll: ";
+    for (int die : dice.getDice()) {
+        std::cout << die << " ";
+    }
+    std::cout << "\n";
+
+    // Roll up to 2 more times
+    for (int roll = 1; roll < 3; ++roll) {
+        std::vector<int> counts(6, 0);
+        for (int die : dice.getDice()) {
+            counts[die - 1]++;
+        }
+
+        // Decide which dice to reroll
+        std::vector<int> rerollIndices;
+        for (int i = 0; i < 5; ++i) {
+            if (counts[dice.getDice()[i] - 1] < 2) { // Reroll dice that are not part of a pair or better
+                rerollIndices.push_back(i);
+            }
+        }
+
+        if (rerollIndices.empty()) break; // No need to reroll
+
+        dice.rollSelected(rerollIndices);
+        std::cout << "Computer rerolled some dice: ";
+        for (int die : dice.getDice()) {
+            std::cout << die << " ";
+        }
+        std::cout << "\n";
+    }
+
+    // Choose the highest-scoring available category
+    int bestCategory = -1;
+    int bestScore = 0;
+    for (int i = 0; i < 13; ++i) {
+        if (!computer.isCategoryScored(i)) {
+            int score = computer.calculateScore(i, dice.getDice());
+            if (score > bestScore) {
+                bestScore = score;
+                bestCategory = i;
+            }
+        }
+    }
+
+    if (bestCategory != -1) {
+        computer.updateScore(bestCategory, bestScore);
+        std::cout << "Computer chose category " << bestCategory + 1 << " and scored " << bestScore << " points.\n";
+    }
+}
+
 // Game loop
 void Game::playRound() {
     for (int round = 0; round < rounds; ++round) {
         std::cout << "\n--- Round " << round + 1 << " ---\n";
 
         for (auto& player : players) {
-            std::cout << "It's " << player.getName() << "'s turn.\n";
+            if (player.getName() == "Computer") {
+                computerTurn(player); // Handle computer's turn
+            } else {
+                std::cout << "It's " << player.getName() << "'s turn.\n";
 
-            // Initial roll
-            dice.rollAll();
-            std::cout << "Initial roll: ";
-            for (int die : dice.getDice()) {
-                std::cout << die << " ";
-            }
-            std::cout << "\n";
-
-            // Roll up to 2 more times
-            for (int roll = 1; roll < 3; ++roll) {
-                std::cout << "Would you like to roll again? (y/n): ";
-                char choice;
-                std::cin >> choice;
-
-                if (choice == 'n' || choice == 'N') break;
-
-                std::cout << "Enter dice indices to reroll (space-separated, e.g., 0 1 4): ";
-                std::cin.ignore(); // Clear newline character
-                std::string inputLine;
-                std::getline(std::cin, inputLine);
-
-                std::vector<int> indices;
-                std::istringstream iss(inputLine);
-                int index;
-                while (iss >> index) {
-                    if (index >= 0 && index < 5) {
-                        indices.push_back(index);
-                    }
-                    else {
-                        std::cout << "Invalid index: " << index << ". Please enter indices between 0 and 4.\n";
-                    }
-                }
-
-                dice.rollSelected(indices);
-
-                std::cout << "Current dice: ";
+                // Initial roll
+                dice.rollAll();
+                std::cout << "Initial roll: ";
                 for (int die : dice.getDice()) {
                     std::cout << die << " ";
                 }
                 std::cout << "\n";
-            }
 
-            // Display categories and prompt for a selection
-            std::cout << "\nSelect a category to score:\n";
-            std::vector<std::string> categories = {
-                "1. Ones        - Sum of all dice showing 1",
-                "2. Twos        - Sum of all dice showing 2",
-                "3. Threes      - Sum of all dice showing 3",
-                "4. Fours       - Sum of all dice showing 4",
-                "5. Fives       - Sum of all dice showing 5",
-                "6. Sixes       - Sum of all dice showing 6",
-                "7. Three of a Kind - Sum of all dice if 3 are the same",
-                "8. Four of a Kind  - Sum of all dice if 4 are the same",
-                "9. Full House     - 25 points for 3 of a kind + 2 of a kind",
-                "10. Small Straight - 30 points for 4 consecutive dice",
-                "11. Large Straight - 40 points for 5 consecutive dice",
-                "12. Yahtzee       - 50 points for all 5 dice the same",
-                "13. Chance        - Sum of all dice"
-            };
+                // Roll up to 2 more times
+                for (int roll = 1; roll < 3; ++roll) {
+                    std::cout << "Would you like to roll again? (y/n): ";
+                    char choice;
+                    std::cin >> choice;
 
-            for (int i = 0; i < categories.size(); ++i) {
-                std::cout << categories[i];
-                if (player.isCategoryScored(i)) {
-                    std::cout << " [Already scored]";
+                    if (choice == 'n' || choice == 'N') break;
+
+                    std::cout << "Enter dice indices to reroll (space-separated, e.g., 0 1 4): ";
+                    std::cin.ignore(); // Clear newline character
+                    std::string inputLine;
+                    std::getline(std::cin, inputLine);
+
+                    std::vector<int> indices;
+                    std::istringstream iss(inputLine);
+                    int index;
+                    while (iss >> index) {
+                        if (index >= 0 && index < 5) {
+                            indices.push_back(index);
+                        }
+                        else {
+                            std::cout << "Invalid index: " << index << ". Please enter indices between 0 and 4.\n";
+                        }
+                    }
+
+                    dice.rollSelected(indices);
+
+                    std::cout << "Current dice: ";
+                    for (int die : dice.getDice()) {
+                        std::cout << die << " ";
+                    }
+                    std::cout << "\n";
                 }
-                else {
-                    int potentialPoints = player.calculateScore(i, dice.getDice());
-                    std::cout << " [Empty, Potential: " << potentialPoints << " points]";
+
+                // Display categories and prompt for a selection
+                std::cout << "\nSelect a category to score:\n";
+                std::vector<std::string> categories = {
+                    "1. Ones        - Sum of all dice showing 1",
+                    "2. Twos        - Sum of all dice showing 2",
+                    "3. Threes      - Sum of all dice showing 3",
+                    "4. Fours       - Sum of all dice showing 4",
+                    "5. Fives       - Sum of all dice showing 5",
+                    "6. Sixes       - Sum of all dice showing 6",
+                    "7. Three of a Kind - Sum of all dice if 3 are the same",
+                    "8. Four of a Kind  - Sum of all dice if 4 are the same",
+                    "9. Full House     - 25 points for 3 of a kind + 2 of a kind",
+                    "10. Small Straight - 30 points for 4 consecutive dice",
+                    "11. Large Straight - 40 points for 5 consecutive dice",
+                    "12. Yahtzee       - 50 points for all 5 dice the same",
+                    "13. Chance        - Sum of all dice"
+                };
+
+                for (int i = 0; i < categories.size(); ++i) {
+                    std::cout << categories[i];
+                    if (player.isCategoryScored(i)) {
+                        std::cout << " [Already scored]";
+                    }
+                    else {
+                        int potentialPoints = player.calculateScore(i, dice.getDice());
+                        std::cout << " [Empty, Potential: " << potentialPoints << " points]";
+                    }
+                    std::cout << "\n";
                 }
-                std::cout << "\n";
+
+                std::cout << "Enter the number of the category you want to score: ";
+                int task = getValidatedInput(1, 13) - 1;
+
+                if (player.isCategoryScored(task)) {
+                    std::cout << "This category is already scored. Please choose another.\n";
+                    task = getValidatedInput(1, 13) - 1;
+                }
+
+                // Update score
+                int score = player.calculateScore(task, dice.getDice());
+                player.updateScore(task, score);
+
+                std::cout << "Score updated! Current scorecard:\n";
+                player.displayScoreCard();
             }
-
-            std::cout << "Enter the number of the category you want to score: ";
-            int task = getValidatedInput(1, 13) - 1;
-
-            if (player.isCategoryScored(task)) {
-                std::cout << "This category is already scored. Please choose another.\n";
-                task = getValidatedInput(1, 13) - 1;
-            }
-
-            // Update score
-            int score = player.calculateScore(task, dice.getDice());
-            player.updateScore(task, score);
-
-            std::cout << "Score updated! Current scorecard:\n";
-            player.displayScoreCard();
         }
     }
 

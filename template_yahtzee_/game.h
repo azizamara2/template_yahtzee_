@@ -19,7 +19,7 @@ private:
     void playRound(); // Handles the logic for playing a single round
     void displayHighScores(); // Displays high scores
     void updateHighScores(); // save highscores
-
+    void computerTurn(Player& computer); //computer logic 
 public:
     Game(); // Constructor to initialize the game
     void displayMenu(); // Displays the main menu of the game
